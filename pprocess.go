@@ -1,7 +1,7 @@
 package lightms
 
 import (
-	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -21,7 +21,7 @@ func AddPrimary(primary primaryProcessFunc) {
 func runPrimaries() {
 	for _, primary := range primaries {
 		t := reflect.TypeOf(primary)
-		fmt.Printf("Running primary: %v\n", t)
+		log.Printf("Running primary process: %v\n", t)
 		go primary().Start()
 	}
 }

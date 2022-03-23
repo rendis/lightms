@@ -1,8 +1,8 @@
 package secondary
 
 import (
-	"fmt"
 	"github.com/rendis/lightms/example/infra/config/prop"
+	"log"
 	"sync"
 )
 
@@ -23,6 +23,6 @@ type PersistencePortImpl struct {
 }
 
 func (p *PersistencePortImpl) Save(msg string) error {
-	fmt.Printf("saving message '%s' in postgres database named '%s'.\n", msg, p.prop.Name)
+	log.Printf("saving message '%s' in postgres database named '%s'.\n", msg, p.prop.Name)
 	return nil
 }
