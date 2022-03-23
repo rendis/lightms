@@ -8,6 +8,6 @@ import (
 // GetJohnDoeUseCase returns impl.JohnDoeImpl instance
 func GetJohnDoeUseCase() usecase.JohnDoeUseCase {
 	return impl.GetJohnDoeImplInstance(
-		GetGetPersistencePort(),
+		GetPersistencePort(),
 	)
 }

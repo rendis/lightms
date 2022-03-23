@@ -6,8 +6,8 @@ import (
 	"github.com/rendis/lightms/example/infra/secondary"
 )
 
-// GetGetPersistencePort returns secondary.PersistencePortImpl instance
-func GetGetPersistencePort() port.PersistencePort {
+// GetPersistencePort returns secondary.PersistencePortImpl instance
+func GetPersistencePort() port.PersistencePort {
 	return secondary.GetPersistencePortImplInstance(
 		prop.GetDatabaseProp().Postgresql,
 	)

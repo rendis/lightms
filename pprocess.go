@@ -2,7 +2,6 @@ package lightms
 
 import (
 	"log"
-	"reflect"
 )
 
 // PrimaryProcess is the primary process to be run by the lightms server
@@ -20,8 +19,8 @@ func AddPrimary(primary primaryProcessFunc) {
 // runPrimaries runs all the primaries
 func runPrimaries() {
 	for _, primary := range primaries {
-		t := reflect.TypeOf(primary)
-		log.Printf("Running primary process: %v\n", t)
-		go primary().Start()
+		pp := primary()
+		log.Printf("Running primary process: %T\n", pp)
+		go pp.Start()
 	}
 }
