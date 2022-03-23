@@ -1,4 +1,4 @@
-# Lightweight Microservices (lightms)
+# Light Microservice (lightms)
 
 ---
 
