@@ -1,0 +1,22 @@
+database:
+  postgresql:
+    host: localhost
+    port: 5432
+    database: postgres
+    user: '{POSTGRES_USER}'
+    password: '{POSTGRES_PASSWORD}'
+  mysql:
+    host: localhost
+    port: 3306
+    database: mysql
+    user: '{MY_SQL_USER}'
+    password: '{MY_SQL_PASSWORD}'
+
+pubsub:
+  subscriptions:
+    sub1:
+      project-id: 'my-project-id'
+      subscription-name: '{SUBSCRIPTION_1_ID}'
+    sub2:
+      project-id: 'other-project-id'
+      subscription-name: '{SUBSCRIPTION_1_ID}'
