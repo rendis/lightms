@@ -1,17 +1,5 @@
 package prop
 
-import "sync"
-
-var databaseProp *DatabaseProp
-var dataBaseOnce sync.Once
-
-func GetDatabaseProp() *DatabaseProp {
-	dataBaseOnce.Do(func() {
-		databaseProp = &DatabaseProp{}
-	})
-	return databaseProp
-}
-
 type DatabaseProp struct {
 	Database `yaml:"database"`
 }

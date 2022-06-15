@@ -1,21 +1,13 @@
 package secondary
 
 import (
+	"github.com/rendis/lightms/example/core/port"
 	"github.com/rendis/lightms/example/infra/config/prop"
 	"log"
-	"sync"
 )
 
-var (
-	instance *PersistencePortImpl
-	once     sync.Once
-)
-
-func GetPersistencePortImplInstance(prop prop.DataBaseInfo) *PersistencePortImpl {
-	once.Do(func() {
-		instance = &PersistencePortImpl{prop}
-	})
-	return instance
+func NewPersistencePort(dbProp prop.DataBaseInfo) port.PersistencePort {
+	return &PersistencePortImpl{dbProp}
 }
 
 type PersistencePortImpl struct {
@@ -23,6 +15,6 @@ type PersistencePortImpl struct {
 }
 
 func (p *PersistencePortImpl) Save(msg string) error {
-	log.Printf("saving message '%s' in postgres database named '%s'.\n", msg, p.prop.Name)
+	log.Printf("Persistence port saving message '%s' in postgres database named '%s'.\n", msg, p.prop.Name)
 	return nil
 }

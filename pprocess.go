@@ -5,14 +5,16 @@ import (
 )
 
 // PrimaryProcess is the primary process to be run by the lightms server
-type PrimaryProcess interface{ Start() }
+type PrimaryProcess interface {
+	Start()
+}
 
-type primaryProcessFunc func() PrimaryProcess
+type primaryProcessSupply func() PrimaryProcess
 
-var primaries = make([]func() PrimaryProcess, 0)
+var primaries = make([]primaryProcessSupply, 0)
 
-// AddPrimary adds a primary process to the list of primaries
-func AddPrimary(primary primaryProcessFunc) {
+// addPrimary adds a primary process to the list of primaries
+func addPrimary(primary primaryProcessSupply) {
 	primaries = append(primaries, primary)
 }
 
@@ -20,7 +22,7 @@ func AddPrimary(primary primaryProcessFunc) {
 func runPrimaries() {
 	for _, primary := range primaries {
 		pp := primary()
-		log.Printf("Running primary process: %T\n", pp)
+		log.Printf("Running primary process: %I\n", pp)
 		go pp.Start()
 	}
 }

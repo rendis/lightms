@@ -7,19 +7,23 @@ import (
 	"syscall"
 )
 
-// LoadLightMs load properties from yml file and run primary processes
-func LoadLightMs() {
-	loadProperties()
-	runPrimaries()
-}
+var instanceReg = newInstanceRegistry()
+var confRr = newConfReader(instanceReg.addInstance, instanceReg.addDependent)
 
-// Run load properties, run primaries and start lightms server
+// Run load properties, inject dependencies, run primaries and start lightms server
 func Run() {
-	LoadLightMs()
+	confRr.readConfReg()
+	instanceReg.resolveDependents()
+	runPrimaries()
+
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM)
 	// waiting for the out signal
 	s := <-signalChan
 	log.Printf("Out signal triggered: %v", s)
 	os.Exit(0)
+}
+
+func AddConf[T any](conf *T) {
+	confRr.addConf(conf)
 }

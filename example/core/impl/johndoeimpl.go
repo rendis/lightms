@@ -2,19 +2,12 @@ package impl
 
 import (
 	"github.com/rendis/lightms/example/core/port"
-	"sync"
+	"github.com/rendis/lightms/example/core/usecase"
+	"log"
 )
 
-var (
-	instance *JohnDoeImpl
-	once     sync.Once
-)
-
-func GetJohnDoeImplInstance(p port.PersistencePort) *JohnDoeImpl {
-	once.Do(func() {
-		instance = &JohnDoeImpl{p}
-	})
-	return instance
+func NewJohnDoeImpl(p port.PersistencePort) usecase.JohnDoeUseCase {
+	return &JohnDoeImpl{p}
 }
 
 type JohnDoeImpl struct {
@@ -22,5 +15,6 @@ type JohnDoeImpl struct {
 }
 
 func (t *JohnDoeImpl) Handle(msg string) error {
+	log.Printf("Usecase 'JohnDoeUseCase' handling message '%s'.\n", msg)
 	return t.persistencePort.Save(msg)
 }
