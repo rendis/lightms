@@ -38,13 +38,14 @@ func (c *confReader) loadConfProps(conf reflect.Value) {
 	elem := conf.Type().Elem()
 	for i := 0; i < elem.NumField(); i++ {
 		field := elem.Field(i)
+		log.Printf("Loading prop %s", field.Name)
 		validateProp(elem.String(), field)
 		propInstance := reflect.New(field.Type.Elem()).Interface()
 		c.propRdr.loadProp(propInstance)
-		log.Printf("Loaded prop '%s'", field.Name)
 		vprop := reflect.ValueOf(propInstance)
 		c.addInstance(field.Name, vprop)
 		conf.Elem().Field(i).Set(vprop)
+		log.Printf("Loaded prop '%s'", field.Name)
 	}
 }
 

@@ -15,12 +15,23 @@ func newInstanceRegistry() *instanceRegistry {
 	}
 }
 
+type InstanceProvider struct {
+	GetByName func(string) any
+}
+
 type instanceRegistry struct {
 	registryMtx        sync.Mutex
 	dependentSuppliers map[string]*supplierInfo
 	namedRegistry      map[string]reflect.Value
 	typedRegistry      map[reflect.Type][]typedInstance
 	instanceNames      []reflect.Type
+}
+
+func (i *instanceRegistry) getInstanceByName(name string) any {
+	if instance, ok := i.namedRegistry[name]; ok {
+		return instance.Interface()
+	}
+	return nil
 }
 
 func (i *instanceRegistry) addInstance(name string, value reflect.Value) {
@@ -37,7 +48,7 @@ func (i *instanceRegistry) addInstance(name string, value reflect.Value) {
 
 	isPP := value.Type().Implements(reflect.TypeOf((*PrimaryProcess)(nil)).Elem())
 	if isPP {
-		addPrimary(func() PrimaryProcess {
+		addPrimary(name, func() PrimaryProcess {
 			return value.Interface().(PrimaryProcess)
 		})
 	}
@@ -47,6 +58,13 @@ func (i *instanceRegistry) addDependent(instanceName string, dependTypes []refle
 	if i.dependentSuppliers[instanceName] != nil {
 		log.Fatalf("Instance '%s' already registered", instanceName)
 	}
+
+	for _, t := range dependTypes {
+		if t.Implements(reflect.TypeOf((*PrimaryProcess)(nil)).Elem()) {
+			log.Fatalf("Instances cannot depend on primary process (PrimaryProcess). Instance name: %s", instanceName)
+		}
+	}
+
 	d := &supplierInfo{
 		name:      instanceName,
 		supplier:  supplier,

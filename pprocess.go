@@ -11,18 +11,23 @@ type PrimaryProcess interface {
 
 type primaryProcessSupply func() PrimaryProcess
 
-var primaries = make([]primaryProcessSupply, 0)
+type primary struct {
+	name     string
+	supplier primaryProcessSupply
+}
+
+var primaries = make([]*primary, 0)
 
 // addPrimary adds a primary process to the list of primaries
-func addPrimary(primary primaryProcessSupply) {
-	primaries = append(primaries, primary)
+func addPrimary(name string, pps primaryProcessSupply) {
+	primaries = append(primaries, &primary{name, pps})
 }
 
 // runPrimaries runs all the primaries
 func runPrimaries() {
-	for _, primary := range primaries {
-		pp := primary()
-		log.Printf("Running primary process: %I\n", pp)
+	for _, pps := range primaries {
+		pp := pps.supplier()
+		log.Printf("Running primary process: %s\n", pps.name)
 		go pp.Start()
 	}
 }
