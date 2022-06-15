@@ -6,12 +6,12 @@ import (
 	"log"
 )
 
-func NewPersistencePort(dbProp prop.DataBaseInfo) port.PersistencePort {
+func NewPersistencePort(dbProp *prop.DataBaseInfo) port.PersistencePort {
 	return &PersistencePortImpl{dbProp}
 }
 
 type PersistencePortImpl struct {
-	prop prop.DataBaseInfo
+	prop *prop.DataBaseInfo
 }
 
 func (p *PersistencePortImpl) Save(msg string) error {

@@ -26,6 +26,10 @@ func SetPropFilePath(propPath string) {
 	propFilePath = propPath
 }
 
+type PropDefault interface {
+	SetDefault()
+}
+
 type propReader struct {
 	loadPropsOnce sync.Once
 	propArr       []byte
@@ -35,8 +39,15 @@ func (p *propReader) loadProp(prop any) {
 	p.readYml()
 	env := []byte(os.ExpandEnv(string(p.propArr)))
 	err := yaml.Unmarshal(env, prop)
+	p.runDefault(prop)
 	if err != nil {
 		log.Fatalf("Error parsing yml file '%s' to struct '%v'. %s", propFilePath, prop, err)
+	}
+}
+
+func (p *propReader) runDefault(prop any) {
+	if d, ok := prop.(PropDefault); ok {
+		d.SetDefault()
 	}
 }
 
