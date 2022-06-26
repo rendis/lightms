@@ -123,17 +123,17 @@ func resolveDependencies() {
 
 	// If there are still dependencies, then there is a circular dependency or a dependency is not resolved
 	if len(dByAlias) > 0 || len(dByTypes) > 0 {
-		log.Println("There is a circular dependency or a dependency is not resolved")
+		log.Println("There is a circular dependency or a dependency is not resolved.")
 		if len(dByAlias) > 0 {
 			log.Println("Dependencies by alias:")
 			for k, v := range dByAlias {
-				log.Printf("%s: %v", k, v)
+				log.Printf("-  %s: %v", k, v)
 			}
 		}
 		if len(dByTypes) > 0 {
 			log.Println("Dependencies by type:")
 			for k, v := range dByTypes {
-				log.Printf("%s: %v", k, v)
+				log.Printf("-  %s: %v", k, v)
 			}
 		}
 		log.Fatalln("Dependencies not resolved")
