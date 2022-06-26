@@ -63,5 +63,6 @@ func loadConfProps(conf reflect.Value) {
 		reader.loadProp(propInstance)
 		vprop := reflect.ValueOf(propInstance)
 		notifyTypeResolved(vprop)
+		conf.Elem().Field(i).Set(vprop)
 	}
 }
