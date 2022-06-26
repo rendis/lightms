@@ -9,12 +9,12 @@ import (
 
 // Run load properties, inject dependencies, run primaries and start lightms server
 func Run() {
+	// Resolve Properties
+	resolveProps()
+
 	// Populating dByAlias and dByTypes
 	processInjectionsByReceivers()
 	processInjectionsByDirect()
-
-	// Resolve Properties
-	resolveProps()
 
 	// Resolve Dependencies
 	resolveDependencies()

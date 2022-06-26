@@ -62,7 +62,7 @@ func loadConfProps(conf reflect.Value) {
 		propInstance := reflect.New(field.Type.Elem()).Interface()
 		reader.loadProp(propInstance)
 		vprop := reflect.ValueOf(propInstance)
-		notifyTypeResolved(vprop)
+		storePropResolved(vprop)
 		conf.Elem().Field(i).Set(vprop)
 	}
 }

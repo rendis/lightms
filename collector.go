@@ -5,6 +5,8 @@ import (
 	"reflect"
 )
 
+var props = make(map[reflect.Type]reflect.Value) // Use to store all loaded props
+
 var completedPP []*container         // Used to set completed dependencies to call constructorFunc
 var completedContainers []*container // Used to set completed dependencies to call constructorFunc
 
@@ -57,6 +59,13 @@ func processInjectionsByDirect() {
 	}
 }
 
+// storePropResolved saves the value of the property in the props map
+func storePropResolved(prop reflect.Value) {
+	if _, ok := props[prop.Type()]; !ok {
+		props[prop.Type()] = prop
+	}
+}
+
 // notifyTypeResolved used when a type is resolved to notify all dependencies of the same type
 func notifyTypeResolved(val reflect.Value) {
 	t := val.Type()
@@ -100,6 +109,11 @@ func notifyAliasResolved(alias string, val reflect.Value) {
 func resolveDependencies() {
 	// First resolve isolateInstances
 	runIsolates()
+
+	// Notify props
+	for _, prop := range props {
+		notifyTypeResolved(prop)
+	}
 
 	// While there are completed dependencies, resolve them
 	for len(completedContainers) > 0 || len(completedPP) > 0 {
