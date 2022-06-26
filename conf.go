@@ -8,9 +8,14 @@ import (
 var propsConf []any
 var reader = newPropReader()
 
-// AddPropConf registers a conf struct to be loaded
-func AddPropConf[T any](conf *T) {
-	propsConf = append(propsConf, conf)
+// AddConf registers a conf struct to be loaded
+func AddConf[T any]() {
+	t := new(T)
+	typ := reflect.TypeOf(t)
+	if typ.Kind() != reflect.Struct {
+		log.Fatalf("AddConf: conf must be a struct, got '%s'", typ.Kind())
+	}
+	propsConf = append(propsConf, t)
 }
 
 // processInjectionsByReceivers analyze receivers to populate dByAlias and dByTypes

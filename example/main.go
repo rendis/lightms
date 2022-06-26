@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Adding properties
-	lightms.AddPropConf(&config.PropsConfig{})
+	lightms.AddConf[*config.PropsConfig]()
 
 	//Set properties file path. Default is "./resources/properties.yml"
 	lightms.SetPropFilePath("example/resources/properties.yml")
