@@ -11,7 +11,7 @@ var reader = newPropReader()
 // AddConf registers a conf struct to be loaded
 func AddConf[T any]() {
 	t := new(T)
-	typ := reflect.TypeOf(t)
+	typ := reflect.TypeOf(t).Elem()
 	if typ.Kind() != reflect.Struct {
 		log.Fatalf("AddConf: conf must be a struct, got '%s'", typ.Kind())
 	}
