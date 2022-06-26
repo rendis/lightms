@@ -2,32 +2,24 @@ package lightms
 
 import (
 	"log"
+	"reflect"
 )
+
+var primaries []PrimaryProcess
+var pptype = reflect.TypeOf((*PrimaryProcess)(nil)).Elem()
 
 // PrimaryProcess is the primary process to be run by the lightms server
 type PrimaryProcess interface {
 	Start()
 }
 
-type primaryProcessSupply func() PrimaryProcess
-
-type primary struct {
-	name     string
-	supplier primaryProcessSupply
-}
-
-var primaries = make([]*primary, 0)
-
-// addPrimary adds a primary process to the list of primaries
-func addPrimary(name string, pps primaryProcessSupply) {
-	primaries = append(primaries, &primary{name, pps})
-}
-
 // runPrimaries runs all the primaries
 func runPrimaries() {
+	if len(primaries) == 0 {
+		log.Fatalf("No primaries process found. Please add one or more primary processes to the lightms server.")
+	}
+	log.Printf("Running %d primaries process", len(primaries))
 	for _, pps := range primaries {
-		pp := pps.supplier()
-		log.Printf("Running primary process: %s\n", pps.name)
-		go pp.Start()
+		go pps.Start()
 	}
 }

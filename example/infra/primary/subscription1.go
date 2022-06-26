@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func NewJohnDoeSubscription(johnDoeUseCase usecase.JohnDoeUseCase, subProp prop.SubscriptionInfo) lightms.PrimaryProcess {
-	return &JohnDoeSubscription{johnDoeUseCase, subProp}
+func NewJohnDoeSubscription(johnDoeUseCase usecase.JohnDoeUseCase, psProp *prop.PubSubProp) lightms.PrimaryProcess {
+	return &JohnDoeSubscription{johnDoeUseCase, psProp.Subscriptions.Sub2}
 }
 
 type JohnDoeSubscription struct {

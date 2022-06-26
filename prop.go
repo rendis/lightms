@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -20,6 +21,7 @@ var (
 
 // SetPropFilePath sets the path of the property file. Default is "resources/properties.yml"
 func SetPropFilePath(propPath string) {
+	propPath = strings.Trim(propPath, " ")
 	if propPath == "" {
 		log.Fatalf("Yml file  parameter is empty.")
 	}
@@ -30,9 +32,14 @@ type PropDefault interface {
 	SetDefault()
 }
 
+func newPropReader() *propReader {
+	p := &propReader{}
+	return p
+}
+
 type propReader struct {
-	loadPropsOnce sync.Once
 	propArr       []byte
+	loadPropsOnce sync.Once
 }
 
 func (p *propReader) loadProp(prop any) {

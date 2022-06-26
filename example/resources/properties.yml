@@ -16,7 +16,10 @@ pubsub:
   subscriptions:
     sub1:
       project-id: 'my-project-id'
-      subscription-name: '$SUBSCRIPTION_1_ID'
+      subscription-name: 'sub1'
     sub2:
       project-id: 'other-project-id'
-      subscription-name: '$SUBSCRIPTION_1_ID'
+      subscription-name: 'sub2'
+    sub3:
+      project-id: 'your-project-id'
+      subscription-name: '$SUBSCRIPTION_3_ID'
