@@ -2,15 +2,17 @@ package lightms
 
 import (
 	"log"
-	"reflect"
 )
 
-var primaries []PrimaryProcess
-var pptype = reflect.TypeOf((*PrimaryProcess)(nil)).Elem()
+var primaries []PrimaryProcess // All completed primary processes
 
 // PrimaryProcess is the primary process to be run by the lightms server
 type PrimaryProcess interface {
 	Start()
+}
+
+func addPP(pp any) {
+	primaries = append(primaries, pp.(PrimaryProcess))
 }
 
 // runPrimaries runs all the primaries

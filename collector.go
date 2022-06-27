@@ -7,30 +7,14 @@ import (
 
 var props = make(map[reflect.Type]reflect.Value) // Use to store all loaded props
 
-var completedPP []*container         // Used to set completed dependencies to call constructorFunc
-var completedContainers []*container // Used to set completed dependencies to call constructorFunc
+var isolateInstances []*container    // Instances with no dependencies waiting to call constructorFunc
+var completedPP []*container         // Completed Primary Process waiting to call constructorFunc
+var completedContainers []*container // Completed Containers waiting to call constructorFunc
 
-var isolateInstances []*container   // Instances with no dependencies
 var dependentInstances []*container // Instances with dependencies
 
 var dByAlias = make(map[string][]*container)       // dependencies by alias
 var dByTypes = make(map[reflect.Type][]*container) // dependencies by type
-
-var aliasResolvers = make(map[string]*container)        // used to resolve dependencies by alias
-var typeResolvers = make(map[reflect.Type][]*container) // used to resolve dependencies by type
-
-// addAliasResolver adds a resolver for the given alias.
-func addAliasResolver(alias string, c *container) {
-	if _, ok := aliasResolvers[alias]; ok {
-		log.Fatalf("alias '%s' already exists", alias)
-	}
-	aliasResolvers[alias] = c
-}
-
-// addTypeResolver adds a resolver for the given type.
-func addTypeResolver(t reflect.Type, c *container) {
-	typeResolvers[t] = append(typeResolvers[t], c)
-}
 
 // addDependency adds not resolved dependency
 func addDependency(c *container) {
@@ -67,9 +51,8 @@ func storePropResolved(prop reflect.Value) {
 }
 
 // notifyTypeResolved used when a type is resolved to notify all dependencies of the same type
-func notifyTypeResolved(val reflect.Value) {
-	t := val.Type()
-	if v, ok := dByTypes[t]; ok {
+func notifyTypeResolved(typ reflect.Type, val reflect.Value) {
+	if v, ok := dByTypes[typ]; ok {
 		for _, c := range v {
 			// completeInjectionByType returns true if all dependencies are resolved
 			if c.completeInjectionByType(val) {
@@ -82,7 +65,7 @@ func notifyTypeResolved(val reflect.Value) {
 			}
 		}
 		// Remove dependencies from dByTypes
-		delete(dByTypes, t)
+		delete(dByTypes, typ)
 	}
 }
 
@@ -112,7 +95,7 @@ func resolveDependencies() {
 
 	// Notify props
 	for _, prop := range props {
-		notifyTypeResolved(prop)
+		notifyTypeResolved(prop.Type(), prop)
 	}
 
 	// While there are completed dependencies, resolve them
@@ -124,73 +107,76 @@ func resolveDependencies() {
 	// If there are still dependencies, then there is a circular dependency or a dependency is not resolved
 	if len(dByAlias) > 0 || len(dByTypes) > 0 {
 		log.Println("There is a circular dependency or a dependency is not resolved.")
+
 		if len(dByAlias) > 0 {
-			log.Println("Dependencies by alias:")
+			log.Println("Dependencies not resolved by alias:")
 			for k, v := range dByAlias {
-				log.Printf("-  %s: %v", k, v)
+				log.Printf("- %s:", k)
+				for _, c := range v {
+					log.Printf("    - %v\n", c.constructorFunc.String())
+				}
 			}
 		}
+
 		if len(dByTypes) > 0 {
-			log.Println("Dependencies by type:")
+			log.Println("Dependencies not resolved by type:")
 			for k, v := range dByTypes {
-				log.Printf("-  %s: %v", k, v)
+				log.Printf("- %s:", k)
+				for _, c := range v {
+					log.Printf("    - %v\n", c.constructorFunc.String())
+				}
 			}
 		}
-		log.Fatalln("Dependencies not resolved")
+		log.Fatalln("Please check your injection configuration.")
 	}
 }
 
 // runCompletedPP used to call constructorFunc of PrimaryProcess
 func runCompletedPP() {
-	for len(completedPP) > 0 {
-		c := completedPP[0]
-		completedPP = completedPP[1:]
-		val := c.constructorFunc.Call(c.params)[0]
-		primaries = append(primaries, val.Interface().(PrimaryProcess))
-		alterVal := getAlter(val) //Get alter value, val is a pointer then alterVal is the value, otherwise alterVal is a pointer to val
-		notifyTypeResolved(val)
-		notifyTypeResolved(alterVal)
-		for _, a := range c.aliases {
-			notifyAliasResolved(a, val)
-			notifyAliasResolved(a, alterVal)
-		}
+	pp := runCompleted(&completedPP)
+	for _, c := range pp {
+		addPP(c)
 	}
 }
 
 // runCompletedContainer used to call constructorFunc of container
 func runCompletedContainer() {
-	for len(completedContainers) > 0 {
-		c := completedContainers[0]
-		completedContainers = completedContainers[1:]
-		val := c.constructorFunc.Call(c.params)[0]
-		alterVal := getAlter(val) //Get alter value, val is a pointer then alterVal is the value, otherwise alterVal is a pointer to val
-		notifyTypeResolved(val)
-		notifyTypeResolved(alterVal)
-		for _, a := range c.aliases {
-			notifyAliasResolved(a, val)
-			notifyAliasResolved(a, alterVal)
-		}
-	}
+	runCompleted(&completedContainers)
 }
 
 // runIsolates used to call constructorFunc of isolateInstances
 func runIsolates() {
-	for _, c := range isolateInstances {
-		val := c.constructorFunc.Call([]reflect.Value{})[0]
-		alter := getAlter(val) //Get alter value, val is a pointer then alterVal is the value, otherwise alterVal is a pointer to val
-		notifyTypeResolved(val)
-		notifyTypeResolved(alter)
-		for _, a := range c.aliases {
-			notifyAliasResolved(a, val)
-			notifyAliasResolved(a, alter)
-		}
+	runCompleted(&isolateInstances)
+}
+
+func runCompleted(readyContainers *[]*container) []any {
+	var callResults []any
+	for len(*readyContainers) > 0 {
+		r := *readyContainers
+		c := r[0]
+		*readyContainers = r[1:]
+		val := c.constructorFunc.Call(c.params)[0]
+		callResults = append(callResults, val.Interface())
+		notifyResolved(c, val)
+	}
+	return callResults
+}
+
+// notifyResolved notify for each alias and interface in container
+func notifyResolved(c *container, value reflect.Value) {
+	for alias := range c.aliases {
+		notifyAliasResolved(alias, value)
+	}
+
+	for interfaceTyp := range c.interfaces {
+		notifyTypeResolved(interfaceTyp, value)
 	}
 }
 
 // getAlter used to get alter value, val is a pointer then alterVal is the value, otherwise alterVal is a pointer to val
-func getAlter(val reflect.Value) reflect.Value {
-	if val.Type().Kind() == reflect.Ptr {
+func getAlter(val reflect.Type) reflect.Type {
+	if val.Kind() == reflect.Ptr {
 		return val.Elem()
 	}
-	return reflect.New(val.Type()).Elem()
+	return reflect.PtrTo(val)
 }
