@@ -19,11 +19,14 @@ var dByTypes = make(map[reflect.Type][]*container) // dependencies by type
 // addDependency adds not resolved dependency
 func addDependency(c *container) {
 	// If dependency not need parameter injection, then added to isolateInstances
-	if c.paramInjections.Len() == 0 {
+	switch {
+	case c.paramInjections.Len() == 0 && c.isPP:
+		completedPP = append(completedPP, c)
+	case c.paramInjections.Len() == 0:
 		isolateInstances = append(isolateInstances, c)
-		return
+	default:
+		dependentInstances = append(dependentInstances, c)
 	}
-	dependentInstances = append(dependentInstances, c)
 }
 
 // processInjectionsByDirect analyze dependentInstances to populate dByAlias and dByTypes
