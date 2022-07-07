@@ -60,7 +60,7 @@ func loadConfProps(conf reflect.Value) {
 		field := elem.Field(i)
 		log.Printf("Loading prop %s", field.Name)
 		if field.Type.Kind() != reflect.Ptr || field.Type.Elem().Kind() != reflect.Struct {
-			log.Fatalf("Prop '%s' in conf '%s' is not a pointer to a struct", field.Name, conf.Type().String())
+			log.Fatalf("Prop '%s' in conf '%s' is not a pointer to a struct", field.Name, elem.String())
 		}
 		propInstance := reflect.New(field.Type.Elem()).Interface()
 		reader.loadProp(propInstance)
