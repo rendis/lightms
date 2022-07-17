@@ -171,7 +171,7 @@ func (c *container) completeInjectionByType(val reflect.Value) bool {
 	iter := c.paramInjections.Iterator()
 	for iter.Next() {
 		t, i, _ := iter.GetCurrentV()
-		if val.Type().ConvertibleTo(t) {
+		if val.Type().AssignableTo(t) {
 			c.paramsCount--
 			c.params[i] = val
 		}
