@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"github.com/rendis/lightms/example/core/port"
-	"github.com/rendis/lightms/example/core/usecase"
+	"github.com/rendis/lightms/v3/example/core/port"
+	"github.com/rendis/lightms/v3/example/core/usecase"
 	"log"
 )
 

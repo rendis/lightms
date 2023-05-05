@@ -1,12 +1,12 @@
 package config
 
 import (
-	"github.com/rendis/lightms"
-	"github.com/rendis/lightms/example/core/impl"
-	"github.com/rendis/lightms/example/core/port"
-	"github.com/rendis/lightms/example/infra/config/prop"
-	"github.com/rendis/lightms/example/infra/primary"
-	"github.com/rendis/lightms/example/infra/secondary"
+	"github.com/rendis/lightms/v3"
+	"github.com/rendis/lightms/v3/example/core/impl"
+	"github.com/rendis/lightms/v3/example/core/port"
+	"github.com/rendis/lightms/v3/example/infra/config/prop"
+	"github.com/rendis/lightms/v3/example/infra/primary"
+	"github.com/rendis/lightms/v3/example/infra/secondary"
 )
 
 type PropsConfig struct {
@@ -19,8 +19,6 @@ func (c *PropsConfig) Subs() {
 }
 
 var _ = lightms.AddInstance(primary.NewJaneDoeSubscription)
-
-//var _ = lightms.AddInstance(primary.NewJohnDoeSubscription)
 
 var _ = lightms.AddInstance(impl.NewJohnDoeImpl).
 	AndInjections().

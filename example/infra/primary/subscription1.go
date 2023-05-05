@@ -1,9 +1,9 @@
 package primary
 
 import (
-	"github.com/rendis/lightms"
-	"github.com/rendis/lightms/example/core/usecase"
-	"github.com/rendis/lightms/example/infra/config/prop"
+	"github.com/rendis/lightms/v3"
+	"github.com/rendis/lightms/v3/example/core/usecase"
+	"github.com/rendis/lightms/v3/example/infra/config/prop"
 	"log"
 	"strconv"
 	"time"

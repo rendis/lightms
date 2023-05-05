@@ -1,7 +1,7 @@
 package secondary
 
 import (
-	"github.com/rendis/lightms/example/infra/config/prop"
+	"github.com/rendis/lightms/v3/example/infra/config/prop"
 	"log"
 )
 
