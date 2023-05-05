@@ -3,20 +3,20 @@ package prop
 import "log"
 
 type DatabaseProp struct {
-	*Database `yaml:"database"`
+	*Database `yaml:"database" json:"database"`
 }
 
 type Database struct {
-	Postgresql *DataBaseInfo `yaml:"postgresql"`
-	Mysql      *DataBaseInfo `yaml:"mysql"`
+	Postgresql *DataBaseInfo `yaml:"postgresql" json:"postgresql"`
+	Mysql      *DataBaseInfo `yaml:"mysql" json:"mysql"`
 }
 
 type DataBaseInfo struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	Name     string `yaml:"database"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+	Host     string `yaml:"host" json:"host"`
+	Port     int    `yaml:"port" json:"port"`
+	Name     string `yaml:"database" json:"database"`
+	User     string `yaml:"user" json:"user"`
+	Password string `yaml:"password" json:"password"`
 }
 
 func (d *DatabaseProp) SetDefault() {

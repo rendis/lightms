@@ -1,6 +1,8 @@
 package lightms
 
 import (
+	"encoding/json"
+	"errors"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
@@ -19,13 +21,61 @@ var (
 	propFilePath = os.Getenv(propPathEnv)
 )
 
+type ConfigFileType int
+
+const (
+	Yml ConfigFileType = iota
+	Json
+)
+
+var ErrInvalidConfigFileType = errors.New("invalid config file type. only yml and json are supported")
+
 // SetPropFilePath sets the path of the property file. Default is "resources/properties.yml"
+// property file can be a yml file or a json file
 func SetPropFilePath(propPath string) {
 	propPath = strings.Trim(propPath, " ")
 	if propPath == "" {
 		log.Fatalf("Yml file  parameter is empty.")
 	}
+
+	if _, err := getConfigFileType(propPath); err != nil {
+		log.Fatalf("Error getting config file type. %s", err)
+	}
+
 	propFilePath = propPath
+}
+
+// getConfigFileType returns the config file type
+// property file can be a yml file or a json file
+func getConfigFileType(path string) (ConfigFileType, error) {
+	ext := filepath.Ext(path)
+	switch ext {
+	case ".yml":
+		return Yml, nil
+	case ".json":
+		return Json, nil
+	default:
+		return 0, ErrInvalidConfigFileType
+	}
+}
+
+func getConfPathAndType() (string, ConfigFileType, error) {
+	if propFilePath == "" {
+		log.Printf("%s is not set, using default supplier: %s\n", propPathEnv, defaultPropPath)
+		propFilePath = defaultPropPath
+	}
+
+	filename, err := filepath.Abs(propFilePath)
+	if err != nil {
+		return "", 0, err
+	}
+
+	fileType, err := getConfigFileType(filename)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return filename, fileType, nil
 }
 
 type PropDefault interface {
@@ -38,18 +88,20 @@ func newPropReader() *propReader {
 }
 
 type propReader struct {
-	propArr       []byte
-	loadPropsOnce sync.Once
+	propArr        []byte
+	configFileType ConfigFileType
+	loadPropsOnce  sync.Once
 }
 
 func (p *propReader) loadProp(prop any) {
-	p.readYml()
-	env := []byte(os.ExpandEnv(string(p.propArr)))
-	err := yaml.Unmarshal(env, prop)
-	p.runDefault(prop)
-	if err != nil {
-		log.Fatalf("Error parsing yml file '%s' to struct '%v'. %s", propFilePath, prop, err)
+	p.readConfigFile()
+	switch p.configFileType {
+	case Yml:
+		p.readFromYml(prop)
+	case Json:
+		p.readFromJson(prop)
 	}
+	p.runDefault(prop)
 }
 
 func (p *propReader) runDefault(prop any) {
@@ -58,22 +110,31 @@ func (p *propReader) runDefault(prop any) {
 	}
 }
 
-func (p *propReader) readYml() {
+func (p *propReader) readConfigFile() {
 	p.loadPropsOnce.Do(func() {
-		if propFilePath == "" {
-			log.Printf("%s is not set, using default supplier: %s\n", propPathEnv, defaultPropPath)
-			propFilePath = defaultPropPath
+		fileName, typ, err := getConfPathAndType()
+		if err != nil {
+			log.Fatalf("Error getting config file type. %s", err)
 		}
 
-		filename, err := filepath.Abs(propFilePath)
+		b, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			log.Fatalf("Error getting yml file '%s'. %s", filename, err)
+			log.Fatalf("Error reading config file. %s", err)
 		}
-
-		b, err := ioutil.ReadFile(filename)
-		if err != nil {
-			log.Fatalf("Error reading yml file '%s'. %s", filename, err)
-		}
-		p.propArr = b
+		propWithEnv := []byte(os.ExpandEnv(string(b)))
+		p.propArr = propWithEnv
+		p.configFileType = typ
 	})
+}
+
+func (p *propReader) readFromYml(prop any) {
+	if err := yaml.Unmarshal(p.propArr, prop); err != nil {
+		log.Fatalf("Error parsing yml file '%s' to struct '%v'. %s", propFilePath, prop, err)
+	}
+}
+
+func (p *propReader) readFromJson(prop any) {
+	if err := json.Unmarshal(p.propArr, prop); err != nil {
+		log.Fatalf("Error parsing json file '%s' to struct '%v'. %s", propFilePath, prop, err)
+	}
 }
