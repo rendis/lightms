@@ -7,7 +7,7 @@ The **lightms** is a very minimalist framework that helps to create a light and 
 It was designed to facilitate the construction of microservices implemented on the hexagonal architecture style, although it can obviously be used on any desired architecture style.
 
 It consists of 2 main characteristics:
-- Loading yml property files at server startup.
+- Loading yml o json property files at server startup.
 -  Creation and start-up of primary processes that will be the entry points (triggers) of our flows.
 
 ## Contents
