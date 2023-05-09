@@ -12,8 +12,8 @@ func main() {
 	lightms.AddConf[config.PropsConfig]()
 
 	//Set properties file path. Default is "./resources/properties.yml"
-	lightms.SetPropFilePath("example/resources/properties.yml")
-	//lightms.SetPropFilePath("example/resources/properties.json")
+	//lightms.SetPropFilePath("example/resources/properties.yml")
+	lightms.SetPropFilePath("example/resources/properties.json")
 
 	// Run lightms
 	lightms.Run()

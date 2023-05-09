@@ -1,10 +1,8 @@
 package lightms
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
@@ -125,12 +123,6 @@ func (p *propReader) readConfigFile() {
 		}
 		propWithEnv := []byte(os.ExpandEnv(string(b)))
 		p.propArr = propWithEnv
-
-		// propWithEnv to base64
-		b64 := base64.StdEncoding.EncodeToString(propWithEnv)
-		fmt.Printf("Property file content B64: %s\n\n", b64)
-		fmt.Printf("Property file content:\n%s", string(propWithEnv))
-
 		p.configFileType = typ
 	})
 }
